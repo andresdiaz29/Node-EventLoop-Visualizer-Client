@@ -17,7 +17,7 @@ This Event Loop Visualizer shows the phases that an Event Loop makes when execut
 
 # Dependencies 
 
-* The repo for the backend service is [here](https://github.com/Darkripper214/Node-EventLoop-Visualizer-Server).
+* The repo for the backend service is [here](https://github.com/andresdiaz29/Node-EventLoop-Visualizer-Server).
 * The repo for the Node.js modified source code is [here]()
 
 # How to run it?
