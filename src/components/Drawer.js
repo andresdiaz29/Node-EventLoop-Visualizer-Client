@@ -22,7 +22,7 @@ const styles = theme => ({
 const Drawer = ({
   classes,
   open,
-  visiblePanels: { taskQueue, microtaskQueue, callStack, eventLoop },
+  visiblePanels: { taskQueue, microtaskQueue, callStack, eventLoop, microTaskLoop },
   onChange,
   onClose,
 }: {|
@@ -33,6 +33,7 @@ const Drawer = ({
     microtaskQueue: boolean,
     callStack: boolean,
     eventLoop: boolean,
+    microTaskLoop: boolean,
   },
   onChange: string => void => any,
   onClose: void => any,
@@ -64,6 +65,12 @@ const Drawer = ({
             <Checkbox checked={eventLoop} onChange={onChange('eventLoop')} value="Event Loop" />
           }
           label="Event Loop"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox checked={eventLoop} onChange={onChange('microTaskLoop')} value="Micro Task Loop" />
+          }
+          label="Micro Task Loop"
         />
       </FormGroup>
     </FormControl>

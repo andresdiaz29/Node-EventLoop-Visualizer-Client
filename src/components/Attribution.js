@@ -23,13 +23,23 @@ const Attribution = ({ classes }: {| classes: any |}) => (
     <Link
       variant="body1"
       color="secondary"
-      href="https://github.com/Darkripper214/"
+      href="https://github.com/vagostep"
+      target="_blank"
+      rel="noreferrer"
+    >
+      vagostep {' '}
+    </Link>
+     based on work from {' '}
+     <Link
+      variant="body1"
+      color="secondary"
+      href="https://github.com/PhakornKiong"
       target="_blank"
       rel="noreferrer"
     >
       PK {' '}
     </Link>
-     based on work from {' '}
+    &  {' '}
     <Link
       variant="body1"
       color="secondary"

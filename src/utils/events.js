@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 const URL = process.env.NODE_ENV === 'production'
   ? 'wss://node-event-loop-server.herokuapp.com/'
-  : 'ws://localhost:8080';
+  : 'ws://localhost:8090';
 export const fetchEventsForCode = (code: string) =>
   new Promise((resolve, reject) => {
     try {

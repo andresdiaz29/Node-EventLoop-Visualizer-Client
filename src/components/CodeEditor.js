@@ -18,7 +18,7 @@ const styles = (theme) => ({
     // backgroundColor: '#fbf1d3',
     // backgroundColor: '#ffffff',
     backgroundColor: theme.palette.primary.main,
-    height: '100%',
+    height: '60%',
     display: 'flex',
   },
 });
@@ -65,10 +65,9 @@ const CodeEditor = ({
   <Paper className={classes.root} elevation={1}>
     <AceEditor
       style={{
-        maxWidth: 500,
         height: '100%',
         marginLeft: -15,
-        marginRight: -15,
+        width: "120%"
       }}
       readOnly={locked}
       value={code}
@@ -91,6 +90,8 @@ const CodeEditor = ({
       showLineNumbers
       editorProps={{ $blockScrolling: Infinity }}
       focus
+      enableLiveAutocompletion
+      enableBasicAutocompletion
     />
   </Paper>
 );

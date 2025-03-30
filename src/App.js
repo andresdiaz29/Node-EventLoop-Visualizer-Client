@@ -12,6 +12,25 @@ import { fetchEventsForCode } from './utils/events';
 
 const pause = (millis) => new Promise((resolve) => setTimeout(resolve, millis));
 
+const isMicroTaskLoopPhase = ({ type }) => 
+[
+  'NextTick',
+  'MicroTasks',
+  'EndProcessTicksAndRejections',
+].includes(type);
+
+const isEventLoopPhase = ({ type }) => 
+[
+  'EventLoopStart',
+  'EventLoopTimers',
+  'EventLoopPendingCallbacks',
+  'EventLoopIdlePrepare',
+  'EventLoopPoll',
+  'EventLoopCheck',
+  'EventLoopCloseCallbacks',
+  'EventLoopFinish',
+].includes(type);
+
 const isPlayableEvent = ({ type }) =>
   [
     'EnterFunction',
@@ -22,11 +41,21 @@ const isPlayableEvent = ({ type }) =>
     'DequeueTask',
     'InitTimeout',
     'BeforeTimeout',
-    'Rerender',
     'ConsoleLog',
     'ConsoleWarn',
     'ConsoleError',
     'ErrorFunction',
+    'EventLoopStart',
+    'EventLoopTimers',
+    'EventLoopPendingCallbacks',
+    'EventLoopIdlePrepare',
+    'EventLoopPoll',
+    'EventLoopCheck',
+    'EventLoopCloseCallbacks',
+    'EventLoopFinish',
+    'NextTick',
+    'MicroTasks',
+    'EndProcessTicksAndRejections'
   ].includes(type);
 
 const PRETTY_MUCH_INFINITY = 9999999999;
@@ -43,7 +72,9 @@ class App extends Component {
     mode: 'editing', // 'editing' | 'running' | 'visualizing'
     code: DEFAULT_CODE,
     isAutoPlaying: false,
-    currentStep: 'none', // 'none' | 'runTask' | 'runMicrotasks' | 'rerender',
+    currentEventLoopStep: 'none', // 'none' | 'runTask' | 'runMicrotasks' | 'rerender',
+    currentMicroTaskLoopStep: 'none', // 'none' | 'runTask' | 'runMicrotasks' | 'rerender',
+    outputs: [],
     example: 'none',
     isDrawerOpen: false,
     visiblePanels: {
@@ -51,10 +82,13 @@ class App extends Component {
       microtaskQueue: true,
       callStack: true,
       eventLoop: true,
+      microTaskLoop: true,
+      terminal: true,
     },
     showCallStackDescription: false,
     showEventLoopDescription: false,
     showTaskQueueDescription: false,
+    showTickTaskQueueDescription: false,
     showMicrotaskQueueDescription: false,
   };
 
@@ -126,21 +160,23 @@ class App extends Component {
       mode: 'running',
       frames: [],
       tasks: [],
+      tickTasks: [],
       microtasks: [],
       markers: [],
       isAutoPlaying: false,
-      currentStep: 'none',
+      currentEventLoopStep: 'none',
+      currentMicroTaskLoopStep: 'none',
     });
 
     try {
       const events = await fetchEventsForCode(code);
       this.currEventIdx = 0;
       this.events = events;
-      this.setState({ mode: 'visualizing', currentStep: 'evaluateScript' });
+      this.setState({ mode: 'visualizing' });
     } catch (e) {
       this.currEventIdx = 0;
       this.showSnackbar('error', e.message);
-      this.setState({ mode: 'editing', currentStep: 'none' });
+      this.setState({ mode: 'editing', currentEventLoopStep: 'none', currentMicroTaskLoopStep: 'none' });
       console.error(e);
     }
   };
@@ -193,12 +229,22 @@ class App extends Component {
       tasks: [],
       microtasks: [],
       markers: [],
+      outputs: [],
       isAutoPlaying: false,
-      currentStep: 'none',
+      currentEventLoopStep: 'none',
+      currentMicroTaskLoopStep: 'none',
     });
   };
 
   hasReachedEnd = () => this.currEventIdx >= this.events.length;
+
+  addOutput = (message) => {
+    const { outputs } = this.state;
+    outputs.push(message);
+    console.log('message: ', message);
+    console.log('outputs: ', JSON.stringify(outputs));
+    this.setState({ outputs })
+  }
 
   getCurrentEvent = () => this.events[this.currEventIdx];
 
@@ -228,14 +274,21 @@ class App extends Component {
     if (!this.getCurrentEvent()) return;
     const {
       type,
-      payload: { funcID, asyncID, name, start, end, message },
+      payload: { funcId, asyncID, name, start, end, message },
     } = this.getCurrentEvent();
 
     if (type === 'ConsoleLog') {
-      this.showSnackbar('info', message);
+      // this.showSnackbar('info', message);  
+      this.addOutput(message);
     }
-    if (type === 'ConsoleWarn') this.showSnackbar('warning', message);
-    if (type === 'ConsoleError') this.showSnackbar('error', message);
+    if (type === 'ConsoleWarn') {
+      // this.showSnackbar('warning', message);
+      this.addOutput('[warn]: ' + message);
+    }
+    if (type === 'ConsoleError') {
+      // this.showSnackbar('error', message);
+      this.addOutput('[error]: ' + message);
+    }
     if (type === 'ErrorFunction') {
       this.showSnackbar('error', `Uncaught Exception in "${name}": ${message}`);
     }
@@ -247,35 +300,38 @@ class App extends Component {
       this.setState({ markers: markers.slice(0, markers.length - 1) });
       this.popCallStackFrame();
     }
-    if (type === 'EnqueueMicrotask') this.enqueueMicrotask(name);
-    if (type === 'DequeueMicrotask') this.dequeueMicrotask();
-    // Init timeout should be enqueue after timeout is finished
-    // if (type === 'InitTimeout') this.enqueueTask(id, callbackName);
-    if (type === 'EnqueueTask')
-      asyncID
-        ? this.enqueueTask(asyncID, name)
-        : this.enqueueTask(funcID, name);
-    if (type === 'DequeueTask')
-      asyncID ? this.dequeueTask(asyncID) : this.dequeueTask(funcID);
+    if (type === 'EnqueueMicrotask') {
+      const id = asyncID || funcId;
+      this.enqueueMicrotask(id, name);
+    }
+    if (type === 'DequeueMicrotask') {
+      const id = asyncID || funcId;
+      this.dequeueMicrotask(id);
+    }
+    
+    if (type === 'EnqueueTask') {
+      const id = asyncID || funcId;
+      this.enqueueTask(id, name)
+    }
+    if (type === 'DequeueTask') {
+      const id = asyncID || funcId;
+      this.dequeueTask(id)
+    }
     // if (type === 'DequeueTask') this.dequeueTask(asyncID);
     // if (type === 'BeforeTimeout') this.dequeueTask(id);
 
     this.currEventIdx += 1;
     this.seekToNextPlayableEvent();
     const nextEvent = this.getCurrentEvent();
+    console.log('nextEvent: ', nextEvent)
 
-    const currentStep =
-      nextEvent === undefined
-        ? 'rerender'
-        : nextEvent.type === 'Rerender'
-        ? 'rerender'
-        : nextEvent.type === 'BeforeTimeout'
-        ? 'runTask'
-        : nextEvent.type === 'DequeueMicrotask'
-        ? 'runMicrotasks'
-        : undefined;
 
-    if (currentStep) this.setState({ currentStep });
+    const currentEventLoopStep = nextEvent ? isEventLoopPhase(nextEvent) ? nextEvent.type : this.state.currentEventLoopStep : 'none';
+    
+    const currentMicroTaskLoopStep = nextEvent ? isMicroTaskLoopPhase(nextEvent) ? nextEvent.type : this.state.currentMicroTaskLoopStep : 'none';
+
+    if (currentEventLoopStep) this.setState({ currentEventLoopStep });
+    if (currentMicroTaskLoopStep) this.setState({ currentMicroTaskLoopStep });
 
     // Automatically move task functions into the call stack
     if (
@@ -335,14 +391,14 @@ class App extends Component {
   //   this.seekToNextPlayableEvent();
   //   const nextEvent = this.getCurrentEvent();
   //
-  //   const currentStep =
+  //   const currentEventLoopStep =
   //       nextEvent      === undefined          ? 'rerender'
   //     : nextEvent.type === 'Rerender'         ? 'rerender'
   //     : nextEvent.type === 'BeforeTimeout'    ? 'runTask'
   //     : nextEvent.type === 'DequeueMicrotask' ? 'runMicrotasks'
   //     : undefined;
   //
-  //   if (currentStep) this.setState({ currentStep });
+  //   if (currentEventLoopStep) this.setState({ currentEventLoopStep });
   //
   //   // Automatically move task functions into the call stack
   //   if (
@@ -365,28 +421,28 @@ class App extends Component {
     this.setState({ frames: newFrames });
   };
 
-  enqueueMicrotask = (name: string) => {
+  enqueueMicrotask = (funcId, name) => {
     const { microtasks } = this.state;
-    const newMicrotasks = microtasks.concat({ id: uuid(), name });
+    const newMicrotasks = microtasks.concat([{ id: funcId, name }]);
     this.setState({ microtasks: newMicrotasks });
   };
 
-  dequeueMicrotask = () => {
+  dequeueMicrotask = (id) => {
     const { microtasks } = this.state;
-    const newMicrotasks = microtasks.slice(1);
+    const newMicrotasks = microtasks.filter((task) => task.id !== id);
     this.setState({ microtasks: newMicrotasks });
   };
 
-  enqueueTask = (id: number, name: string) => {
+  enqueueTask = (funcId, name) => {
     const { tasks } = this.state;
-    const newTasks = tasks.concat({ id, name });
+    const newTasks = tasks.concat([{ id: funcId, name }]);
     this.setState({ tasks: newTasks });
   };
 
   // We can't just pop tasks like we can for the Call Stack and Microtask Queue,
   // because if timers have a delay, their execution order isn't necessarily
   // FIFO.
-  dequeueTask = (id: number) => {
+  dequeueTask = (id) => {
     const { tasks } = this.state;
     const newTasks = tasks.filter((task) => task.id !== id);
     this.setState({ tasks: newTasks });
@@ -400,11 +456,13 @@ class App extends Component {
       markers,
       mode,
       example,
+      outputs,
       code,
       isAutoPlaying,
       isDrawerOpen,
       visiblePanels,
-      currentStep,
+      currentEventLoopStep,
+      currentMicroTaskLoopStep,
       showCallStackDescription,
       showEventLoopDescription,
       showTaskQueueDescription,
@@ -420,6 +478,7 @@ class App extends Component {
         microtasks={microtasks}
         frames={frames}
         markers={markers}
+        outputs={outputs}
         visiblePanels={visiblePanels}
         isAutoPlaying={isAutoPlaying}
         isDrawerOpen={isDrawerOpen}
@@ -428,7 +487,8 @@ class App extends Component {
         showTaskQueueDescription={showTaskQueueDescription}
         showMicrotaskQueueDescription={showMicrotaskQueueDescription}
         hasReachedEnd={this.hasReachedEnd()}
-        currentStep={currentStep}
+        currentEventLoopStep={currentEventLoopStep}
+        currentMicroTaskLoopStep={currentMicroTaskLoopStep}
         onChangeVisiblePanel={this.handleChangeVisiblePanel}
         onCloseDrawer={this.handleCloseDrawer}
         onOpenDrawer={this.handleOpenDrawer}

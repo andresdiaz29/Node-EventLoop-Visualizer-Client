@@ -11,10 +11,11 @@ import posed, { PoseGroup } from 'react-pose';
 import { pastels } from '../styles/colors';
 import '../styles/index.css';
 import CardHeaderWithAbout from './CardHeaderWithAbout';
+import uuid from 'uuid/v4';
 
 const styles = (theme) => ({
   card: {
-    maxHeight: 140,
+    maxHeight: 110,
     margin: theme.spacing.unit,
     height: 120,
     backgroundColor: theme.palette.primary.main,

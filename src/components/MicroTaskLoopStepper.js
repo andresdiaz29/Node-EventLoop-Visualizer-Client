@@ -10,13 +10,13 @@ import Typography from '@material-ui/core/Typography';
 import Stepper from '@material-ui/core/Stepper';
 
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 
 import CardHeaderWithAbout from './CardHeaderWithAbout';
 
-const blueTheme = createMuiTheme({
+const blueTheme = createTheme({
   palette: { primary: blue },
   typography: {
     fontSize: 16,
@@ -32,7 +32,7 @@ const styles = theme => ({
     backgroundColor: theme.palette.primary.main,
     flex: 1,
     maxWidth: 300,
-    overflowY: 'auto',
+    overflowY: 'hidden',
   },
   stepper: {
     backgroundColor: 'transparent',
@@ -40,39 +40,34 @@ const styles = theme => ({
 });
 
 const stepTitles = [
-  'Evaluate Script',
-  'Run a Task',
-  'Run all Microtasks',
-  'Rerender',
+  'Next Tick',
+  'MicroTasks',
 ];
 
 const stepDescriptions = [
-  'Synchronously execute the script as though it were a function body. Run until the Call Stack is empty.',
-  'Select the oldest Task from the Task Queue. Run it until the Call Stack is empty.',
-  'Select the oldest Microtask from the Microtask Queue. Run it until the Call Stack is empty. Repeat until the Microtask Queue is empty.',
-  'Rerender the UI. Then, return to step 2. (This step only applies to browsers, not NodeJS).',
+  'NodeJs runs a new Event Loop.',
+  'Ends of current Event Loop.',
 ];
 
 const idxForStep = {
-  none: -1,
-  evaluateScript: 0,
-  runTask: 1,
-  runMicrotasks: 2,
-  rerender: 3,
+  "none": -1,
+  "EndProcessTicksAndRejections": -1,
+  "NextTick": 0,
+  "MicroTasks": 1,
 };
 
-const ExecutionModelStepper = ({
+const MicroTaskLoopStepper = ({
   step,
   classes,
   onClickAbout,
-}: {|
+}: {
   classes: any,
-  step: 'none' | 'evaluateScript' | 'runTask' | 'runMicrotasks' | 'rerender',
+  step: 'EndProcessTicksAndRejections' | 'NextTick' | 'MicroTasks',
   onClickAbout: void => any,
-|}) => (
+}) => (
   <Card className={classes.card}>
     <CardContent>
-      <CardHeaderWithAbout title="Event Loop" onClickAbout={onClickAbout} />
+      <CardHeaderWithAbout title="Ticks & Rejections" onClickAbout={onClickAbout} />
       <MuiThemeProvider theme={blueTheme}>
         <Stepper
           activeStep={idxForStep[step]}
@@ -99,4 +94,4 @@ const ExecutionModelStepper = ({
   </Card>
 );
 
-export default withStyles(styles)(ExecutionModelStepper);
+export default withStyles(styles)(MicroTaskLoopStepper);

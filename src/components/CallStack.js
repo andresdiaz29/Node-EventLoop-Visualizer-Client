@@ -17,21 +17,22 @@ import CardHeaderWithAbout from './CardHeaderWithAbout';
 const styles = theme => ({
   card: {
     margin: theme.spacing.unit,
-    maxWidth: 230,
-    minWidth: 230,
+    maxWidth: 300,
+    minWidth: 300,
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: theme.palette.primary.main,
+    overflowY: 'hidden',
   },
   content: {
-    width: 200,
+    width: 270,
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
   },
   frame: {
-    width: 165,
+    width: 'auto',
     height: 30,
     paddingTop: theme.spacing.unit * 1,
     paddingBottom: theme.spacing.unit * 1,
@@ -57,7 +58,7 @@ const FrameDiv = posed(Frame)({
   enter: {
     y: 0,
     opacity: 1,
-    width: 165,
+    width: '88%',
     transition: {
       y: { type: 'tween' },
     }
@@ -66,7 +67,7 @@ const FrameDiv = posed(Frame)({
     y: -200,
     opacity: 0,
     height: 30,
-    width: 165,
+    width: '88%',
     transition: {
       y: { type: 'tween' },
     }
