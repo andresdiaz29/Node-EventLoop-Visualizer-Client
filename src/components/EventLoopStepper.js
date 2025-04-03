@@ -14,7 +14,7 @@ import { createTheme } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 
-import CardHeaderWithAbout from './CardHeaderWithAbout';
+import CardHeaderWithoutAbout from './CardHeaderWithoutAbout';
 
 const blueTheme = createTheme({
   palette: { primary: blue },
@@ -84,7 +84,7 @@ const EventLoopStepper = ({
 }) => (
   <Card className={classes.card}>
     <CardContent>
-      <CardHeaderWithAbout title="Event Loop" onClickAbout={onClickAbout} />
+      <CardHeaderWithoutAbout title="Event Loop"/>
       <MuiThemeProvider theme={blueTheme}>
         <Stepper
           activeStep={idxForStep[step]}

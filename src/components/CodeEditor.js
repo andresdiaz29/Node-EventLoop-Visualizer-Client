@@ -4,6 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 import 'brace';
 import 'brace/mode/javascript';
 import 'brace/theme/solarized_light';
+import 'brace/theme/monokai';
 import React from 'react';
 import AceEditor from 'react-ace';
 import { getPastelIndexFor } from '../styles/colors';

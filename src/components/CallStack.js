@@ -12,7 +12,7 @@ import Typography from '@material-ui/core/Typography';
 
 import { getPastelForIndex } from '../styles/colors';
 import '../styles/index.css';
-import CardHeaderWithAbout from './CardHeaderWithAbout';
+import CardHeaderWithoutAbout from './CardHeaderWithoutAbout';
 
 const styles = theme => ({
   card: {
@@ -94,7 +94,7 @@ class CallStack extends React.Component<Props> {
     return (
       <Card className={classes.card}>
         <CardContent className={classes.content}>
-          <CardHeaderWithAbout title="Call Stack" onClickAbout={onClickAbout} />
+          <CardHeaderWithoutAbout title="Call Stack"/>
           <div style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>
             <Measure bounds onResize={this.handleResize}>
               {({ measureRef: ref }) => <div ref={ref} style={{ flex: 1 }} />}

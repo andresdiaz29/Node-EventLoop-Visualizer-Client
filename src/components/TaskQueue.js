@@ -10,7 +10,7 @@ import Measure from 'react-measure';
 import posed, { PoseGroup } from 'react-pose';
 import { pastels } from '../styles/colors';
 import '../styles/index.css';
-import CardHeaderWithAbout from './CardHeaderWithAbout';
+import CardHeaderWithoutAbout from './CardHeaderWithoutAbout';
 import uuid from 'uuid/v4';
 
 const styles = (theme) => ({
@@ -53,7 +53,6 @@ const TaskDiv = posed(Task)({
     x: 200,
     opacity: 1,
     height: 25,
-    width: 140,
     transition: {
       x: { type: 'tween' },
     },
@@ -69,7 +68,6 @@ const TaskDiv = posed(Task)({
     x: -200,
     opacity: 0,
     height: 25,
-    width: 140,
     transition: {
       x: { type: 'tween' },
     },
@@ -97,9 +95,8 @@ class TaskQueue extends React.Component<Props> {
     return (
       <Card className={classes.card}>
         <CardContent className={classes.content}>
-          <CardHeaderWithAbout
+          <CardHeaderWithoutAbout
             title={title}
-            onClickAbout={onClickAbout}
             slideButtonLeft
           />
           <div style={{ display: 'flex', flexDirection: 'row', flex: 1 }}>

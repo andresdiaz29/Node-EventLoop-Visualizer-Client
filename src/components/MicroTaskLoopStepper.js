@@ -14,7 +14,7 @@ import { createTheme } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 import blue from '@material-ui/core/colors/blue';
 
-import CardHeaderWithAbout from './CardHeaderWithAbout';
+import CardHeaderWithoutAbout from './CardHeaderWithoutAbout';
 
 const blueTheme = createTheme({
   palette: { primary: blue },
@@ -41,12 +41,12 @@ const styles = theme => ({
 
 const stepTitles = [
   'Next Tick',
-  'MicroTasks',
+  'Micro Tasks',
 ];
 
 const stepDescriptions = [
-  'NodeJs runs a new Event Loop.',
-  'Ends of current Event Loop.',
+  'Node.js executes process.nextTick callbacks before microtasks.',
+  'Node.js executes microtasks from the queue, including promise callbacks.',
 ];
 
 const idxForStep = {
@@ -67,7 +67,7 @@ const MicroTaskLoopStepper = ({
 }) => (
   <Card className={classes.card}>
     <CardContent>
-      <CardHeaderWithAbout title="Ticks & Rejections" onClickAbout={onClickAbout} />
+      <CardHeaderWithoutAbout title="Ticks & Rejections"/>
       <MuiThemeProvider theme={blueTheme}>
         <Stepper
           activeStep={idxForStep[step]}

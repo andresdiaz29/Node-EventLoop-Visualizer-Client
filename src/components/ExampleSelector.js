@@ -11,6 +11,8 @@ import { withStyles } from '@material-ui/core/styles';
 import EXAMPLES1 from '../assets/examples1';
 import EXAMPLES2 from '../assets/examples2';
 import EXAMPLES3 from '../assets/examples3';
+import EXAMPLES4 from '../assets/examples4';
+import EXAMPLES5 from '../assets/examples5';
 
 const styles = theme => ({
   form: {
@@ -55,11 +57,11 @@ const ExampleSelector = ({
           <MenuItem key={name} value={value}>{name}</MenuItem>
         ))}
         <Divider />
-        {EXAMPLES2.map(({ name, value }) => (
+        {EXAMPLES4.map(({ name, value }) => (
           <MenuItem key={name} value={value}>{name}</MenuItem>
         ))}
         <Divider />
-        {EXAMPLES3.map(({ name, value }) => (
+        {EXAMPLES5.map(({ name, value }) => (
           <MenuItem key={name} value={value}>{name}</MenuItem>
         ))}
       </Select>
