@@ -1,5 +1,7 @@
 # Node.js EventLoop Visualizer Client
 
+## **UPDATE** This repo has been moved [here](https://github.com/vagostep/Node-EventLoop-Visualizer)
+
 ![Demo of the Node-Event-Loop](event-loop-visualizer.gif)
 
 Try it out! [Node-Event-Loop](https://node-event-loop.herokuapp.com/)
